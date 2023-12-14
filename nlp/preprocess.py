@@ -17,6 +17,7 @@ merged_file_path = './merged_dataset.csv'
 all_data.to_csv(merged_file_path, index=False)
 print(f"Merged dataset saved to {merged_file_path}")
 '''
+'''
 import pandas as pd
 
 # 加载CSV文件
@@ -29,3 +30,19 @@ data.iloc[:, 5] = data.iloc[:, 3].str.extract(r'(^[\w-]+)')
 
 # 保存修改后的CSV文件
 data.to_csv('editeditmergeddataset.csv', index=False)  # 您可以根据需要修改保存的文件名
+'''
+import pandas as pd
+from sklearn.model_selection import train_test_split
+
+# 读取 CSV 文件
+file_path = 'dataset.csv'  # 替换为你的文件路径
+data = pd.read_csv(file_path)
+
+# 分层切割数据集
+# 不使用分层抽样
+train_data, test_data = train_test_split(data, test_size=0.1)
+
+
+# 保存训练集和测试集
+train_data.to_csv('train_dataset.csv', index=False)
+test_data.to_csv('test_dataset.csv', index=False)
