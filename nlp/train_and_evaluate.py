@@ -13,7 +13,7 @@ class CustomDataset(Dataset):
 
     def __getitem__(self, idx):
         item = {key: torch.tensor(val[idx]) for key, val in self.encodings.items()}
-        item['labels'] = torch.tensor(self.labels[idx])
+        item['Label'] = torch.tensor(self.labels[idx])
         return item
 
     def __len__(self):
@@ -59,7 +59,7 @@ def train_and_evaluate(dataset_path, model_path, num_labels):
             outputs = model(**batch)
         logits = outputs.logits
         predictions.extend(logits.argmax(dim=-1).cpu().numpy())
-        true_labels.extend(batch["labels"].cpu().numpy())
+        true_labels.extend(batch["Label"].cpu().numpy())
 
     accuracy = accuracy_score(true_labels, predictions)
     print("Accuracy:", accuracy)

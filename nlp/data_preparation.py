@@ -18,7 +18,7 @@ def load_and_preprocess_data(file_path):
         return tokenizer(examples, padding="max_length", truncation=True, max_length=128)
 
     # 应用分词
-    train_encodings = tokenize_function(train_data['text'].tolist())
-    test_encodings = tokenize_function(test_data['text'].tolist())
+    train_encodings = tokenize_function(train_data['Description'].tolist())
+    test_encodings = tokenize_function(test_data['Description'].tolist())
 
-    return train_encodings, train_data['label'].tolist(), test_encodings, test_data['label'].tolist()
+    return train_encodings, train_data['Label'].tolist(), test_encodings, test_data['Label'].tolist()

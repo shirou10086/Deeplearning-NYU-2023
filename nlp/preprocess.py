@@ -31,6 +31,7 @@ data.iloc[:, 5] = data.iloc[:, 3].str.extract(r'(^[\w-]+)')
 # 保存修改后的CSV文件
 data.to_csv('editeditmergeddataset.csv', index=False)  # 您可以根据需要修改保存的文件名
 '''
+'''
 import pandas as pd
 from sklearn.model_selection import train_test_split
 
@@ -46,3 +47,18 @@ train_data, test_data = train_test_split(data, test_size=0.1)
 # 保存训练集和测试集
 train_data.to_csv('train_dataset.csv', index=False)
 test_data.to_csv('test_dataset.csv', index=False)
+'''
+import pandas as pd
+
+# 替换为你的 CSV 文件路径
+file_path = './dataset/TrainTest/dataset.csv'
+
+# 读取 CSV 文件
+data = pd.read_csv(file_path)
+
+# 将 Label 列转换为整数
+data['Label'] = data['Label'].astype(int)
+
+# 保存修改后的 DataFrame 到新的 CSV 文件
+output_file_path = './dataset/TrainTest/dataset.csv'
+data.to_csv(output_file_path, index=False)

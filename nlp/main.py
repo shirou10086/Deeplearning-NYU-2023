@@ -4,7 +4,7 @@ from train_and_evaluate import train_and_evaluate
 from predict import load_model, predict
 
 def main():
-    dataset_path = "dataset.csv"
+    dataset_path = "./dataset/TrainTest/train_dataset.csv"
     model_path = "trained_model"
     num_labels = 2  # 根据你的任务调整这个值
 
