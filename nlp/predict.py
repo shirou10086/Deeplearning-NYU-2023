@@ -15,7 +15,8 @@ def predict(text, model, tokenizer):
         outputs = model(**inputs)
     logits = outputs.logits
     probabilities = softmax(logits, dim=-1)
-    return probabilities[0].tolist()  # Convert the first (and only) batch of probabilities to a list
+    pest_probability = probabilities[0][1].item()
+    return pest_probability
 
 # 示例用法
 if __name__ == "__main__":

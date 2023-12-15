@@ -9,8 +9,8 @@ def batch_predict(model, tokenizer, descriptions):
     return predictions
 
 def main():
-    traindataset_path = "./dataset/TrainTest/train_dataset.csv"
-    testdataset_path = "./dataset/TrainTest/test_dataset.csv"
+    currentdataset='train'
+    dataset_path = "./dataset/TrainTest/"+currentdataset+"_dataset.csv"
     model_path = "trained_model"
     num_labels = 2  # 根据你的任务调整这个值
 
@@ -21,11 +21,11 @@ def main():
 
     if sys.argv[1] == "prepare":
         print("Preparing data...")
-        load_and_preprocess_data(traindataset_path)
+        load_and_preprocess_data(dataset_path)
 
     elif sys.argv[1] == "train":
         print("Training model...")
-        train_and_evaluate(traindataset_path, model_path, num_labels)
+        train_and_evaluate(dataset_path, model_path, num_labels)
 
     elif sys.argv[1] == "predict":
         # 现在不需要额外的命令行参数了
@@ -33,7 +33,7 @@ def main():
         model, tokenizer = load_model(model_path)
 
         # 读取 CSV 文件
-        test_dataset = pd.read_csv(testdataset_path)
+        test_dataset = pd.read_csv(dataset_path)
         descriptions = test_dataset['Description'].tolist()
 
         # 进行批量预测
