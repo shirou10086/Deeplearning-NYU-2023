@@ -1,5 +1,5 @@
-# predict.py
 import torch
+from torch.nn.functional import softmax
 from transformers import AutoTokenizer, AutoModelForSequenceClassification
 
 def load_model(model_path):
@@ -13,8 +13,9 @@ def predict(text, model, tokenizer):
     inputs = {k: v.to(model.device) for k, v in inputs.items()}
     with torch.no_grad():
         outputs = model(**inputs)
-    prediction = outputs.logits.argmax(dim=-1).item()
-    return prediction
+    logits = outputs.logits
+    probabilities = softmax(logits, dim=-1)
+    return probabilities[0].tolist()  # Convert the first (and only) batch of probabilities to a list
 
 # 示例用法
 if __name__ == "__main__":
@@ -22,5 +23,5 @@ if __name__ == "__main__":
     model, tokenizer = load_model(model_path)
 
     text_to_classify = "The image features a group of ants walking on a wooden surface..."
-    prediction = predict(text_to_classify, model, tokenizer)
-    print("Prediction:", prediction)
+    probabilities = predict(text_to_classify, model, tokenizer)
+    print("Probabilities:", probabilities)
