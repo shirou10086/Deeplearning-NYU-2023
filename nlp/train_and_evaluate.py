@@ -4,6 +4,9 @@ from transformers import AutoModelForSequenceClassification, AdamW
 from torch.nn import CrossEntropyLoss
 from sklearn.metrics import accuracy_score
 from tqdm import tqdm
+import matplotlib.pyplot as plt
+
+# Assuming 'load_and_preprocess_data' function is defined in 'data_preparation.py'
 from data_preparation import load_and_preprocess_data
 
 class CustomDataset(Dataset):
@@ -20,51 +23,86 @@ class CustomDataset(Dataset):
         return len(self.labels)
 
 def train_and_evaluate(dataset_path, model_path, num_labels):
-    # 加载和预处理数据
+    # Load and preprocess data
     train_encodings, train_labels, test_encodings, test_labels = load_and_preprocess_data(dataset_path)
 
-    # 创建数据集
+    # Create datasets
     train_dataset = CustomDataset(train_encodings, train_labels)
     test_dataset = CustomDataset(test_encodings, test_labels)
 
-    # 创建数据加载器
+    # Create dataloaders
     train_loader = DataLoader(train_dataset, batch_size=16, shuffle=True)
     test_loader = DataLoader(test_dataset, batch_size=16, shuffle=False)
 
-    # 加载预训练模型
+    # Load pre-trained model
     model = AutoModelForSequenceClassification.from_pretrained("huawei-noah/TinyBERT_General_4L_312D", num_labels=num_labels)
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model.to(device)
 
-    # 定义优化器
+    # Define optimizer
     optimizer = AdamW(model.parameters(), lr=5e-5)
 
-    # 创建损失函数实例
+    # Loss function
     loss_function = CrossEntropyLoss()
 
-    # 训练模型
+    # Track loss values for plotting
+    # Track loss and accuracy values for plotting
+    epoch_loss_values = []
+    epoch_accuracy_values = []
+
+    # Train model
+    num_epochs = 10  # Set the number of epochs
     model.train()
-    for epoch in range(3):  # 迭代次数可以调整
+    for epoch in range(num_epochs):
+        total_loss = 0
+        correct_predictions = 0
+        total_predictions = 0
+
         for batch in tqdm(train_loader):
             inputs = {k: v.to(device) for k, v in batch.items() if k != 'labels'}
             labels = batch['labels'].to(device)
 
-            # 清除之前的梯度
             optimizer.zero_grad()
 
-            # 前向传播
             outputs = model(**inputs)
-
-            # 计算损失
             loss = loss_function(outputs.logits, labels)
+            total_loss += loss.item()
 
-            # 反向传播
+            preds = torch.argmax(outputs.logits, dim=1)
+            correct_predictions += (preds == labels).sum().item()
+            total_predictions += labels.size(0)
+
             loss.backward()
-
-            # 更新参数
             optimizer.step()
 
-    # 评估模型
+        avg_loss = total_loss / len(train_loader)
+        epoch_loss_values.append(avg_loss)
+
+        epoch_accuracy = correct_predictions / total_predictions
+        epoch_accuracy_values.append(epoch_accuracy)
+
+        print(f"Epoch {epoch+1} - Loss: {avg_loss}, Accuracy: {epoch_accuracy}")
+
+    # Plot training loss and accuracy
+    plt.figure(figsize=(12, 5))
+    plt.subplot(1, 2, 1)
+    plt.plot(epoch_loss_values, label='Training Loss')
+    plt.xlabel('Epoch')
+    plt.ylabel('Loss')
+    plt.title('Training Loss Over Epochs')
+    plt.legend()
+
+    plt.subplot(1, 2, 2)
+    plt.plot(epoch_accuracy_values, label='Training Accuracy', color='orange')
+    plt.xlabel('Epoch')
+    plt.ylabel('Accuracy')
+    plt.title('Training Accuracy Over Epochs')
+    plt.legend()
+
+    plt.tight_layout()
+    plt.show()
+
+    # Evaluate model
     model.eval()
     predictions, true_labels = [], []
     for batch in test_loader:
@@ -73,14 +111,15 @@ def train_and_evaluate(dataset_path, model_path, num_labels):
 
         with torch.no_grad():
             outputs = model(**inputs)
+
         logits = outputs.logits
         predictions.extend(logits.argmax(dim=-1).cpu().numpy())
         true_labels.extend(labels.cpu().numpy())
 
     accuracy = accuracy_score(true_labels, predictions)
-    print(f"Accuracy: {accuracy}")
+    print(f"Test Accuracy: {accuracy}")
 
-    # 保存模型
+    # Save model
     model.save_pretrained(model_path)
 
-# 确保其他文件（data_preparation.py）也正确配置
+# Ensure that 'data_preparation.py' and necessary libraries are correctly set up.
